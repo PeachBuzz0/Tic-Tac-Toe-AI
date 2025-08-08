@@ -24,9 +24,9 @@ def render(board: list[list[str | None]]) -> None:
             if board[row][col] is None:
                 print(".", end=" ")
             elif board[row][col].lower() == "o":
-                print("O", end=" ")
+                print("\033[31mO\033[0m", end=" ")
             elif board[row][col].lower() == "x":
-                print("X", end=" ")
+                print("\033[34mX\033[0m", end=" ")
             else:
                 print(".", end=" ")
         print('|')
