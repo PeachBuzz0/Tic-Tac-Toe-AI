@@ -1,0 +1,27 @@
+# board = get_board()
+#
+# while gameOngoing:
+#     # Figure out whose turn it is
+#     current_player = ...
+#
+#     # Print board to terminal
+#     render(board)
+#
+#     # Figure out best move
+#     best_move = player.get_best_move(board_state)
+#
+#     # Do the move
+#     make_move(best_move, board)
+#
+#     # Check if winner
+#     winner = get_winner(board)
+#
+#     if winner:
+#         print(f'Player {winner} wins!')
+#         break
+#
+#     # Check if board is full
+#     if board.isFull():
+#         break
+#
+#     # Repeat until winner
