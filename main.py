@@ -55,7 +55,9 @@ def is_valid_move(board: list[list[str | None]], move: tuple[int, int]) -> bool:
         return False
 
 
-def make_move(board: list[list[str | None]], move_coords: tuple[int, int], player_mark: str) -> list[list[str | None]]:
+def make_move(board: list[list[str | None]],
+              move_coords: tuple[int, int],
+              player_mark: str) -> list[list[str | None]]:
     next_board: list[list[str | None]] = board.copy()
 
     while True:
@@ -108,7 +110,7 @@ def get_winner(board: list[list[str | None]]) -> str | None:
 
 
 if __name__ == "__main__":
-    # Intialize Board
+    # Initialize Board
     board: list[list[str | None]] = new_board()
 
     # Pick a Player To Go First
