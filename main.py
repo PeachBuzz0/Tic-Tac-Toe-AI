@@ -1,12 +1,14 @@
 """
 Tic Tac Toe AI
 Created by: Gabe(Peach)
-Created on: Aug 8, 2025 01:30 AM
+Created on: Aug 1, 2025 01:30 AM
 """
+
 
 def new_board() -> list[list[None]]:
     empty_board = [[None for _ in range(3)] for _ in range(3)]
     return empty_board
+
 
 def render(board: list[list[str | None]]) -> None:
     # PRINT COL NUMS TO TOP OF BOARD
@@ -28,6 +30,7 @@ def render(board: list[list[str | None]]) -> None:
 
     print(" ---------")
 
+
 def get_move() -> tuple[int, int]:
     user_move = input("Enter your move(row col): ")
 
@@ -37,9 +40,10 @@ def get_move() -> tuple[int, int]:
 
     return user_cords
 
+
 def is_valid_move(board: list[list[str | None]], move: tuple[int, int]) -> bool:
-    try :
-        if move[0] < 0 or move[1] < 0: #Dont let players negative index
+    try:
+        if move[0] < 0 or move[1] < 0:  # Dont let players negative index
             raise IndexError
         elif board[move[0]][move[1]] is None:
             return True
@@ -49,6 +53,7 @@ def is_valid_move(board: list[list[str | None]], move: tuple[int, int]) -> bool:
     except IndexError:
         print("Invalid move. Row or Column does not exist.")
         return False
+
 
 def make_move(board: list[list[str | None]], move_coords: tuple[int, int], player_mark: str) -> list[list[str | None]]:
     next_board: list[list[str | None]] = board.copy()
@@ -62,12 +67,13 @@ def make_move(board: list[list[str | None]], move_coords: tuple[int, int], playe
     next_board[move_coords[0]][move_coords[1]] = player_mark
     return next_board
 
-def get_winner(board: list[list[str | None]]) -> str | None :
+
+def get_winner(board: list[list[str | None]]) -> str | None:
     winner: str
 
     lines: list[list[tuple[int, int]]] = [
         # Rows
-        [(0 , 0), (0, 1), (0, 2)],
+        [(0, 0), (0, 1), (0, 2)],
         [(1, 0), (1, 1), (1, 2)],
         [(2, 0), (2, 1), (2, 2)],
         # Columns
@@ -91,7 +97,7 @@ def get_winner(board: list[list[str | None]]) -> str | None :
             elif isinstance(board[coord[0]][coord[1]], str):
                 chars.append(board[coord[0]][coord[1]])
 
-        if (chars[0] == chars[1]) == (chars[0] == chars[2]) == True:
+        if (chars[0] == chars[1]) == (chars[0] == chars[2]) is True:
             winner = chars[0]
             return winner
 
@@ -101,12 +107,11 @@ def get_winner(board: list[list[str | None]]) -> str | None :
     return None
 
 
-
 if __name__ == "__main__":
-    #Intialize Board
+    # Intialize Board
     board: list[list[str | None]] = new_board()
 
-    #Pick a Player To Go First
+    # Pick a Player To Go First
     turn: int = 1
 
     while True:
