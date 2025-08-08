@@ -110,6 +110,30 @@ def get_winner(board: list[list[str | None]]) -> str | None:
 
 
 if __name__ == "__main__":
+    # Check for Players Names
+    players: dict[str, str] = {
+        "X": "",
+        "O": "",
+    }
+
+    try:
+        amt_players: int = int(input("How many players? "))
+
+        if (amt_players < 0) or (amt_players > 2):
+            raise ValueError
+
+        for i in range(amt_players):
+            player_name: str = input(f"Enter name for player {i + 1}: ")
+
+            if i == 0:
+                players['O'] = player_name
+            elif i == 1:
+                players['X'] = player_name
+
+
+    except ValueError:
+        print("Please enter a integer between 1 and 2.")
+
     # Initialize Board
     board: list[list[str | None]] = new_board()
 
@@ -131,3 +155,5 @@ if __name__ == "__main__":
         make_move(board, get_move(), player)
 
         turn += 1
+
+    print(f"Player {players[get_winner(board).upper()]} wins!")
