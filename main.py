@@ -4,6 +4,9 @@ Created by: Gabe(Peach)
 Created on: Aug 1, 2025 01:30 AM
 """
 
+import random
+from collections.abc import Callable
+
 
 def new_board() -> list[list[None]]:
     empty_board = [[None for _ in range(3)] for _ in range(3)]
@@ -41,6 +44,13 @@ def get_move() -> tuple[int, int]:
     return user_cords
 
 
+def random_move() -> tuple[int, int]:
+    row: int = random.randint(0, len(board))
+    column: int = random.randint(0, len(board[0]))
+
+    move: tuple[int, int] = (row, column)
+    return move
+
 def is_valid_move(board: list[list[str | None]], move: tuple[int, int]) -> bool:
     try:
         if move[0] < 0 or move[1] < 0:  # Dont let players negative index
@@ -56,15 +66,17 @@ def is_valid_move(board: list[list[str | None]], move: tuple[int, int]) -> bool:
 
 
 def make_move(board: list[list[str | None]],
-              move_coords: tuple[int, int],
+              move_func: Callable[..., tuple[int, int]],
               player_mark: str) -> list[list[str | None]]:
     next_board: list[list[str | None]] = board.copy()
+
+    move_coords = move_func()
 
     while True:
         if is_valid_move(board, move_coords):
             break
         else:
-            move_coords = get_move()
+            move_coords = move_func()
 
     next_board[move_coords[0]][move_coords[1]] = player_mark
     return next_board
@@ -112,8 +124,8 @@ def get_winner(board: list[list[str | None]]) -> str | None:
 if __name__ == "__main__":
     # Check for Players Names
     players: dict[str, str] = {
-        "X": "",
-        "O": "",
+        "X": "Bot",
+        "O": "Bot",
     }
 
     try:
@@ -152,8 +164,13 @@ if __name__ == "__main__":
         else:
             player = 'o'
 
-        make_move(board, get_move(), player)
+        if players[player.upper()] == 'Bot':
+            # TODO Make Bot Logic script
+            # Use Random Move for now
+            make_move(board, random_move, player)
+        else:
+            make_move(board, get_move, player)
 
         turn += 1
 
-    print(f"Player {players[get_winner(board).upper()]} wins!")
+    print(f"{players[get_winner(board).upper()]} wins!")
