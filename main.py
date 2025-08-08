@@ -39,7 +39,8 @@ def get_move() -> tuple[int, int]:
 
     split_user_move: list[str] = user_move.split()
 
-    user_cords: tuple[int, int] = (int(split_user_move[0]), int(split_user_move[1]))
+    user_cords: tuple[int, int] = (int(split_user_move[0]),
+                                   int(split_user_move[1]))
 
     return user_cords
 
@@ -51,7 +52,9 @@ def random_move() -> tuple[int, int]:
     move: tuple[int, int] = (row, column)
     return move
 
-def is_valid_move(board: list[list[str | None]], move: tuple[int, int]) -> bool:
+
+def is_valid_move(board: list[list[str | None]],
+                  move: tuple[int, int]) -> bool:
     try:
         if move[0] < 0 or move[1] < 0:  # Dont let players negative index
             raise IndexError
@@ -141,7 +144,6 @@ if __name__ == "__main__":
                 players['O'] = player_name
             elif i == 1:
                 players['X'] = player_name
-
 
     except ValueError:
         print("Please enter a integer between 1 and 2.")
