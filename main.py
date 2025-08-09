@@ -4,7 +4,7 @@ Created by: Gabe(Peach)
 Created on: Aug 1, 2025 01:30 AM
 """
 
-import random
+from bot_logic import finds_winning_moves_ai
 from collections.abc import Callable
 
 
@@ -34,7 +34,8 @@ def render(board: list[list[str | None]]) -> None:
     print(" ---------")
 
 
-def get_move() -> tuple[int, int]:
+def get_move(board: list[list[str | None]],
+             current_player: str) -> tuple[int, int]:
     user_move = input("Enter your move(row col): ")
 
     split_user_move: list[str] = user_move.split()
@@ -45,27 +46,35 @@ def get_move() -> tuple[int, int]:
     return user_cords
 
 
-def random_move() -> tuple[int, int]:
-    row: int = random.randint(0, len(board))
-    column: int = random.randint(0, len(board[0]))
+class MoveTaken(Exception):
+    """
+    Exception raised when a move would be illegal
+    because it has already been made.
+    """
 
-    move: tuple[int, int] = (row, column)
-    return move
+    def __init__(self):
+        super().__init__()
 
 
 def is_valid_move(board: list[list[str | None]],
-                  move: tuple[int, int]) -> bool:
+                  move: tuple[int, int],
+                  print_error: bool = False) -> bool:
     try:
         if move[0] < 0 or move[1] < 0:  # Dont let players negative index
             raise IndexError
         elif board[move[0]][move[1]] is None:
             return True
         else:
-            print(f"Invalid move! {move} is already taken, try again.")
-            return False
+            raise MoveTaken
+
     except IndexError:
-        print("Invalid move. Row or Column does not exist.")
-        return False
+        error_msg = "Invalid move. Row or Column does not exist."
+    except MoveTaken:
+        error_msg = f"Invalid move! {move} is already taken, try again."
+
+    print(error_msg)
+
+    return False
 
 
 def make_move(board: list[list[str | None]],
@@ -73,13 +82,13 @@ def make_move(board: list[list[str | None]],
               player_mark: str) -> list[list[str | None]]:
     next_board: list[list[str | None]] = board.copy()
 
-    move_coords = move_func()
+    move_coords = move_func(board, player_mark)
 
     while True:
         if is_valid_move(board, move_coords):
             break
         else:
-            move_coords = move_func()
+            move_coords = move_func(board, player_mark)
 
     next_board[move_coords[0]][move_coords[1]] = player_mark
     return next_board
@@ -137,16 +146,17 @@ if __name__ == "__main__":
         if (amt_players < 0) or (amt_players > 2):
             raise ValueError
 
-        for i in range(amt_players):
-            player_name: str = input(f"Enter name for player {i + 1}: ")
+        if amt_players != 0:
+            for i in range(amt_players):
+                player_name: str = input(f"Enter name for player {i + 1}: ")
 
-            if i == 0:
-                players['O'] = player_name
-            elif i == 1:
-                players['X'] = player_name
+                if i == 0:
+                    players['O'] = player_name
+                elif i == 1:
+                    players['X'] = player_name
 
     except ValueError:
-        print("Please enter a integer between 1 and 2.")
+        print("Please enter a integer between 0 and 2.")
 
     # Initialize Board
     board: list[list[str | None]] = new_board()
@@ -167,9 +177,7 @@ if __name__ == "__main__":
             player = 'o'
 
         if players[player.upper()] == 'Bot':
-            # TODO Make Bot Logic script
-            # Use Random Move for now
-            make_move(board, random_move, player)
+            make_move(board, finds_winning_moves_ai, player)
         else:
             make_move(board, get_move, player)
 

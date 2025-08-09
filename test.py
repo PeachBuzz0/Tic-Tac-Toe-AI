@@ -2,6 +2,7 @@
 testing script for certain functions
 """
 from main import *
+from bot_logic import *
 
 
 def render_test() -> None: #Passed
@@ -32,7 +33,7 @@ def illegal_move_test() -> None: #Passed
     board = make_move(board, move_coords, player_mark="O")
 
 
-def get_winner_test() -> None:
+def get_winner_test() -> None: # Passed
     board_1 = [["X", "X", "O"],
                ["O", "X", None],
                ["O", "O", "X"]]
@@ -43,6 +44,18 @@ def get_winner_test() -> None:
                ["O", "O", "X"]]
     print(get_winner(board_2))
 
+def test_find_winning_moves() -> None:
+    board = [
+        ['X', 'O', None],
+        [None, 'O', None],
+        ['X', None, None]
+    ]
+    print(finds_winning_moves_ai(board, 'X'))
+    print(finds_winning_moves_ai(board, 'X'))
+
+    print(finds_winning_moves_ai(board, 'O'))
+    print(finds_winning_moves_ai(board, 'O'))
+
 
 if __name__ == "__main__":
-    get_winner_test()
+    test_find_winning_moves()
