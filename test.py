@@ -5,7 +5,7 @@ from main import *
 from bot_logic import *
 
 
-def render_test() -> None: #Passed
+def render_test() -> None:  # Passed
     board: list[list] = new_board()
     board[0][1] = "X"
     board[1][1] = "O"
@@ -13,7 +13,7 @@ def render_test() -> None: #Passed
     render(board)
 
 
-def make_move_test() -> None: #Passed
+def make_move_test() -> None:  # Passed
     board = new_board()
 
     move_cords_1: tuple[int, int] = (2, 0)
@@ -25,7 +25,7 @@ def make_move_test() -> None: #Passed
     render(board)
 
 
-def illegal_move_test() -> None: #Passed
+def illegal_move_test() -> None:  # Passed
     board = new_board()
 
     move_coords: tuple[int, int] = (2, 0)
@@ -33,7 +33,7 @@ def illegal_move_test() -> None: #Passed
     board = make_move(board, move_coords, player_mark="O")
 
 
-def get_winner_test() -> None: # Passed
+def get_winner_test() -> None:  # Passed
     board_1 = [["X", "X", "O"],
                ["O", "X", None],
                ["O", "O", "X"]]
@@ -44,7 +44,8 @@ def get_winner_test() -> None: # Passed
                ["O", "O", "X"]]
     print(get_winner(board_2))
 
-def test_find_winning_moves() -> None:
+
+def test_find_winning_moves() -> None:  # Passed
     board = [
         ['X', 'O', None],
         [None, 'O', None],
@@ -57,5 +58,64 @@ def test_find_winning_moves() -> None:
     print(finds_winning_moves_ai(board, 'O'))
 
 
+def test_find_winning_and_losing_moves() -> None:  # Passed
+    board = [
+        ['X', 'O', None],
+        [None, 'O', None],
+        ['X', None, None]
+    ]
+
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+
+    board = [
+        ['O', 'X', None],
+        [None, 'X', None],
+        ['O', None, None]
+    ]
+
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+
+    board = [
+        ['X', 'O', None],
+        [None, 'X', None],
+        ['O', None, None]
+    ]
+
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+
+    board = [
+        ['X', 'O', None],
+        ["X", 'O', None],
+        [None, None, None]
+    ]
+
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+    print(finds_winning_and_losing_moves_ai(board, 'X'))
+
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+
+    board = [
+        ["X", "O", "O"],
+        [None, "X", None],
+        [None, None, None]
+    ]
+
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+    print(finds_winning_and_losing_moves_ai(board, 'O'))
+
+
 if __name__ == "__main__":
-    test_find_winning_moves()
+    test_find_winning_and_losing_moves()

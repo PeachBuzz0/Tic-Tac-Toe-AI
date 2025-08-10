@@ -4,7 +4,7 @@ Created by: Gabe(Peach)
 Created on: Aug 1, 2025 01:30 AM
 """
 
-from bot_logic import finds_winning_moves_ai
+from bot_logic import finds_winning_moves_ai, finds_winning_and_losing_moves_ai
 from collections.abc import Callable
 
 
@@ -34,8 +34,8 @@ def render(board: list[list[str | None]]) -> None:
     print(" ---------")
 
 
-def get_move(board: list[list[str | None]],
-             current_player: str) -> tuple[int, int]:
+def human_player(board: list[list[str | None]],
+                 current_player: str) -> tuple[int, int]:
     user_move = input("Enter your move(row col): ")
 
     split_user_move: list[str] = user_move.split()
@@ -172,15 +172,17 @@ if __name__ == "__main__":
 
         player: str
         if (turn % 2) == 0:
-            player = 'x'
+            player = 'X'
         else:
-            player = 'o'
+            player = 'O'
 
         if players[player.upper()] == 'Bot':
-            make_move(board, finds_winning_moves_ai, player)
+            make_move(board, finds_winning_and_losing_moves_ai, player)
         else:
-            make_move(board, get_move, player)
+            make_move(board, human_player, player)
 
         turn += 1
 
     print(f"{players[get_winner(board).upper()]} wins!")
+
+# TODO step 5
