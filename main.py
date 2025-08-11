@@ -4,7 +4,9 @@ Created by: Gabe(Peach)
 Created on: Aug 1, 2025 01:30 AM
 """
 
-from bot_logic import finds_winning_moves_ai, finds_winning_and_losing_moves_ai
+import sys
+
+from bot_logic import *
 from collections.abc import Callable
 
 
@@ -57,8 +59,7 @@ class MoveTaken(Exception):
 
 
 def is_valid_move(board: list[list[str | None]],
-                  move: tuple[int, int],
-                  print_error: bool = False) -> bool:
+                  move: tuple[int, int],) -> bool:
     try:
         if move[0] < 0 or move[1] < 0:  # Dont let players negative index
             raise IndexError
@@ -80,6 +81,7 @@ def is_valid_move(board: list[list[str | None]],
 def make_move(board: list[list[str | None]],
               move_func: Callable[..., tuple[int, int]],
               player_mark: str) -> list[list[str | None]]:
+
     next_board: list[list[str | None]] = board.copy()
 
     move_coords = move_func(board, player_mark)
@@ -123,7 +125,9 @@ def get_winner(board: list[list[str | None]]) -> str | None:
             elif isinstance(board[coord[0]][coord[1]], str):
                 chars.append(board[coord[0]][coord[1]])
 
-        if (chars[0] == chars[1]) == (chars[0] == chars[2]) is True:
+        if (((chars[0] == chars[1]) == (chars[0] == chars[2]) is True)
+                and (chars[0] != '')):
+
             winner = chars[0]
             return winner
 
@@ -134,29 +138,50 @@ def get_winner(board: list[list[str | None]]) -> str | None:
 
 
 if __name__ == "__main__":
-    # Check for Players Names
-    players: dict[str, str] = {
-        "X": "Bot",
-        "O": "Bot",
+    # Dictionary to store player info
+    # "Player mark" : [move function/algorithm, name]
+    players: dict[str, list[str]] = {
+        "O": ['...', 'Player 1'],
+        "X": ["...", 'Player 2']
     }
 
-    try:
-        amt_players: int = int(input("How many players? "))
+    # Get move function
+    move_funcs: list[str] = sys.argv[1:]
 
-        if (amt_players < 0) or (amt_players > 2):
-            raise ValueError
+    if not move_funcs:
+        move_funcs = ['human_player', "human_player"]
 
-        if amt_players != 0:
-            for i in range(amt_players):
-                player_name: str = input(f"Enter name for player {i + 1}: ")
+    # Test if move algorithm exist
+    class AINotFound(Exception):
+        """
+        Descriptive error for when a move algorithm/AI is not defined
+        """
 
-                if i == 0:
-                    players['O'] = player_name
-                elif i == 1:
-                    players['X'] = player_name
+        def __init__(self):
+            super().__init__("AI not found. Make sure to "
+                             "import the algorithm in main.py, "
+                             "\nand function name is spelled correctly")
 
-    except ValueError:
-        print("Please enter a integer between 0 and 2.")
+    for i, move_func in enumerate(move_funcs):
+        if move_func in dir():
+            pass
+        else:
+            raise AINotFound
+
+        # Get players name if they are a Human Player
+        if i == 0:
+            player_mark = "O"
+        else:
+            player_mark = "X"
+
+        if move_func == "human_player":
+            inputted_name: str = input(f"Enter name for "
+                                       f"{players[player_mark][1]}: ")
+
+            players[player_mark][1] = inputted_name
+
+        players['O'][0] = move_funcs[0]
+        players['X'][0] = move_funcs[1]
 
     # Initialize Board
     board: list[list[str | None]] = new_board()
@@ -167,7 +192,9 @@ if __name__ == "__main__":
     while True:
         render(board)
 
-        if get_winner(board):
+        winner: str | None = get_winner(board)
+
+        if get_winner(board) is not None:
             break
 
         player: str
@@ -176,13 +203,15 @@ if __name__ == "__main__":
         else:
             player = 'O'
 
-        if players[player.upper()] == 'Bot':
-            make_move(board, finds_winning_and_losing_moves_ai, player)
-        else:
-            make_move(board, human_player, player)
+        move_func = getattr(sys.modules[__name__], players[player][0])
+
+        make_move(board, move_func, player)
 
         turn += 1
 
-    print(f"{players[get_winner(board).upper()]} wins!")
-
-# TODO step 5
+    if winner.lower() == 'draw':
+        print("Draw! Maybe play again.")
+    else:
+        player_name: str = players[winner][1]
+        player_algorithm: str = players[winner][0]
+        print(f'{player_name}({player_algorithm}) wins!')
