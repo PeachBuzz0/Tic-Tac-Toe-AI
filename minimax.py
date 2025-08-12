@@ -7,7 +7,7 @@ from copy import deepcopy
 from engine import determine_winner, get_opponent, get_legal_moves
 
 
-def _make_move(board: list[list[str | None]],
+def _test_move(board: list[list[str | None]],
                move: tuple[int, int],
                current_player: str) -> list[list[str | None]]:
 
@@ -52,7 +52,7 @@ def _minimax_score(board: list[list[str | None]],
         _board: list[list[str | None]] = deepcopy(board)
 
         # First make the move
-        _board = _make_move(_board, move, current_player)
+        _board = _test_move(_board, move, current_player)
 
         # Then get minimax score for the resulting
         # board state, passing in 'current_player''s
@@ -84,7 +84,7 @@ def minimax_ai(board: list[list[str | None]],
 
     for move in legal_moves:
         _board: list[list[str | None]] = deepcopy(board)
-        _board = _make_move(_board, move, current_player)
+        _board = _test_move(_board, move, current_player)
 
         move_score: float = _minimax_score(_board,
                                            get_opponent(current_player),
