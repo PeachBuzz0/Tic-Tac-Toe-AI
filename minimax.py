@@ -85,7 +85,7 @@ def get_opponent(current_player: str) -> str:
         raise ValueError('Invalid player')
 
 
-def _minimax_score(board: list[list[str | None]], current_player: str, player_we_want_to_win: str) -> int:
+def _minimax_score(board: list[list[str | None]], current_player: str, player_we_want_to_win: str, branch: int = 0) -> float:
     # If board is a terminal state, immediately
     # Return the appropriate score
 
@@ -102,7 +102,7 @@ def _minimax_score(board: list[list[str | None]], current_player: str, player_we
 
     # Iterate over moves, calculating a score for them
     # Keep all the scores in a list
-    scores: list[int] = []
+    scores: list[float] = []
 
     for move in legal_moves:
         _board: list[list[str | None]] = deepcopy(board)
@@ -115,21 +115,21 @@ def _minimax_score(board: list[list[str | None]], current_player: str, player_we
         # opponents because it would be their turn
 
         opponent: str = get_opponent(current_player)
-        score: int = _minimax_score(_board, opponent, player_we_want_to_win)
-        scores.append(score)
+        score: float = _minimax_score(_board, opponent, player_we_want_to_win, branch + 1)
+        scores.append(score - (branch * 0.1))
 
-    # If current_player is our AI (X for now),
+    # If current_player is our AI,
     # then we want maximized score
     if current_player == player_we_want_to_win:
         return max(scores)
 
-    # If current_player is our opponent(O for now),
+    # If current_player is our opponent,
     # then we want to minimize score
     else:
         return min(scores)
 
 def minimax_ai(board: list[list[str | None]], current_player: str) -> tuple[int, int]:
-    best_score: int = -1000
+    best_score: float = -1000.0
     best_move: tuple[int, int] = (-1, -1)
 
     legal_moves: list[tuple[int, int]] = get_legal_moves(board)
@@ -138,7 +138,7 @@ def minimax_ai(board: list[list[str | None]], current_player: str) -> tuple[int,
         _board: list[list[str | None]] = deepcopy(board)
         _board = make_move(_board, move, current_player)
 
-        move_score = _minimax_score(_board, get_opponent(current_player), current_player)
+        move_score: float = _minimax_score(_board, get_opponent(current_player), current_player)
 
         if move_score >= best_score:
             best_score = move_score
@@ -174,6 +174,7 @@ if __name__ == '__main__':
     ]
 
     print(minimax_ai(board, "X"))
+    print(minimax_ai(board, "O"))
     print(minimax_ai(board_2, 'X'))
     print(minimax_ai(board_3, 'X'))
     print(minimax_ai(board_3, 'O'))
