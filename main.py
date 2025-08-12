@@ -4,136 +4,13 @@ Created by: Gabe(Peach)
 Created on: Aug 1, 2025 01:30 AM
 """
 
+# flake8: noqa F403, F405
+
 import sys
 
-from bot_logic import *
-from collections.abc import Callable
-
-
-def new_board() -> list[list[None]]:
-    empty_board = [[None for _ in range(3)] for _ in range(3)]
-    return empty_board
-
-
-def render(board: list[list[str | None]]) -> None:
-    # PRINT COL NUMS TO TOP OF BOARD
-    print("   0 1 2 ")
-    print(" ---------")
-
-    for row in range(3):
-        print(f'{row}|', end=" ")
-        for col in range(3):
-            if board[row][col] is None:
-                print(".", end=" ")
-            elif board[row][col].lower() == "o":
-                print("\033[31mO\033[0m", end=" ")
-            elif board[row][col].lower() == "x":
-                print("\033[34mX\033[0m", end=" ")
-            else:
-                print(".", end=" ")
-        print('|')
-
-    print(" ---------")
-
-
-def human_player(board: list[list[str | None]],
-                 current_player: str) -> tuple[int, int]:
-    user_move = input("Enter your move(row col): ")
-
-    split_user_move: list[str] = user_move.split()
-
-    user_cords: tuple[int, int] = (int(split_user_move[0]),
-                                   int(split_user_move[1]))
-
-    return user_cords
-
-
-class MoveTaken(Exception):
-    """
-    Exception raised when a move would be illegal
-    because it has already been made.
-    """
-
-    def __init__(self):
-        super().__init__()
-
-
-def is_valid_move(board: list[list[str | None]],
-                  move: tuple[int, int],) -> bool:
-    try:
-        if move[0] < 0 or move[1] < 0:  # Dont let players negative index
-            raise IndexError
-        elif board[move[0]][move[1]] is None:
-            return True
-        else:
-            raise MoveTaken
-
-    except IndexError:
-        error_msg = "Invalid move. Row or Column does not exist."
-    except MoveTaken:
-        error_msg = f"Invalid move! {move} is already taken, try again."
-
-    print(error_msg)
-
-    return False
-
-
-def make_move(board: list[list[str | None]],
-              move_func: Callable[..., tuple[int, int]],
-              player_mark: str) -> list[list[str | None]]:
-
-    next_board: list[list[str | None]] = board.copy()
-
-    move_coords = move_func(board, player_mark)
-
-    while True:
-        if is_valid_move(board, move_coords):
-            break
-        else:
-            move_coords = move_func(board, player_mark)
-
-    next_board[move_coords[0]][move_coords[1]] = player_mark
-    return next_board
-
-
-def get_winner(board: list[list[str | None]]) -> str | None:
-    winner: str
-
-    lines: list[list[tuple[int, int]]] = [
-        # Rows
-        [(0, 0), (0, 1), (0, 2)],
-        [(1, 0), (1, 1), (1, 2)],
-        [(2, 0), (2, 1), (2, 2)],
-        # Columns
-        [(0, 0), (1, 0), (2, 0)],
-        [(0, 1), (1, 1), (2, 1)],
-        [(0, 2), (1, 2), (2, 2)],
-        # Diagonals
-        [(0, 0), (1, 1), (2, 2)],
-        [(0, 2), (1, 1), (2, 0)]
-    ]
-
-    open_spaces: int = 0
-
-    for line in lines:
-        chars: list[str] = []
-
-        for coord in line:
-            if board[coord[0]][coord[1]] is None:
-                chars.append('')
-                open_spaces += 1
-            elif isinstance(board[coord[0]][coord[1]], str):
-                chars.append(board[coord[0]][coord[1]])
-
-        if (chars.count(chars[0]) == len(chars)) and (chars[0] != ''):
-            winner = chars[0]
-            return winner
-
-    if open_spaces == 0:
-        return "draw"
-
-    return None
-
+from engine import *
+from simple_algorithms import *
+from minimax import minimax_ai
 
 if __name__ == "__main__":
     # Dictionary to store player info
@@ -160,8 +37,8 @@ if __name__ == "__main__":
                              "import the algorithm in main.py, "
                              "\nand function name is spelled correctly")
 
-    for i, move_func in enumerate(move_funcs):
-        if move_func in dir():
+    for i, func in enumerate(move_funcs):
+        if func in dir():
             pass
         else:
             raise AINotFound
@@ -172,7 +49,7 @@ if __name__ == "__main__":
         else:
             player_mark = "X"
 
-        if move_func == "human_player":
+        if func == "human_player":
             inputted_name: str = input(f"Enter name for "
                                        f"{players[player_mark][1]}: ")
 
@@ -181,18 +58,16 @@ if __name__ == "__main__":
         players['O'][0] = move_funcs[0]
         players['X'][0] = move_funcs[1]
 
-    # Initialize Board
-    board: list[list[str | None]] = new_board()
+    board: list[list[str | None]] = new_board()  # type: ignore
 
-    # Pick a Player To Go First
     turn: int = 1
 
     while True:
         render(board)
 
-        winner: str | None = get_winner(board)
+        winner: str | None = determine_winner(board)
 
-        if get_winner(board) is not None:
+        if determine_winner(board) is not None:
             break
 
         player: str
@@ -201,11 +76,14 @@ if __name__ == "__main__":
         else:
             player = 'O'
 
+        # Make sure move function is imported into main
         move_func = getattr(sys.modules[__name__], players[player][0])
 
         make_move(board, move_func, player)
 
         turn += 1
+
+    assert isinstance(winner, str)
 
     if winner.lower() == 'draw':
         print("Draw! Maybe play again.")

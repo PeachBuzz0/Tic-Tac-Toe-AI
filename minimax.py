@@ -4,66 +4,10 @@ for minimax algorithm
 """
 
 from copy import deepcopy
+from engine import determine_winner, get_opponent, get_legal_moves
 
 
-def determine_winner(board: list[list[str | None]]) -> str:
-    lines: list[list[tuple[int, int]]] = [
-        # Rows
-        [(0, 0), (0, 1), (0, 2)],
-        [(1, 0), (1, 1), (1, 2)],
-        [(2, 0), (2, 1), (2, 2)],
-        # Columns
-        [(0, 0), (1, 0), (2, 0)],
-        [(0, 1), (1, 1), (2, 1)],
-        [(0, 2), (1, 2), (2, 2)],
-        # Diagonals
-        [(0, 0), (1, 1), (2, 2)],
-        [(0, 2), (1, 1), (2, 0)]
-    ]
-
-    open_spaces: int = 0
-
-    for line in lines:
-        chars: list[str] = []
-
-        for coord in line:
-            if board[coord[0]][coord[1]] is None:
-                chars.append('')
-                open_spaces += 1
-            elif isinstance(board[coord[0]][coord[1]], str):
-                chars.append(board[coord[0]][coord[1]])  # type: ignore
-
-        if chars.count('O') == 3:
-            return 'O'
-        elif chars.count('X') == 3:
-            return 'X'
-
-    if open_spaces == 0:
-        return 'draw'
-
-    return ''
-
-
-def get_legal_moves(board: list[list[str | None]]) -> list[tuple[int, int]]:
-    all_moves: list[tuple[int, int]] = [
-        (0, 0), (0, 1), (0, 2),
-        (1, 0), (1, 1), (1, 2),
-        (2, 0), (2, 1), (2, 2),
-    ]
-
-    legal_moves: list[tuple[int, int]] = []
-
-    for move in all_moves:
-        row: int = move[0]
-        col: int = move[1]
-
-        if board[row][col] is None:
-            legal_moves.append((row, col))
-
-    return legal_moves
-
-
-def make_move(board: list[list[str | None]],
+def _make_move(board: list[list[str | None]],
                move: tuple[int, int],
                current_player: str) -> list[list[str | None]]:
 
@@ -74,18 +18,18 @@ def make_move(board: list[list[str | None]],
     return _board
 
 
-def get_opponent(current_player: str) -> str:
-    current_player = current_player.upper()
+def _minimax_score(board: list[list[str | None]],
+                   current_player: str,
+                   player_we_want_to_win: str,
+                   branch: int = 0) -> float:
+    """
+    Use the minimax algorithm score next move.
+    Score is a float between -10 and 10.
+    A tenth of a point is taken off per branch,
+    which represents the amount of moves to get
+    to that move.
+    """
 
-    if current_player == 'X':
-        return 'O'
-    elif current_player == 'O':
-        return 'X'
-    else:
-        raise ValueError('Invalid player')
-
-
-def _minimax_score(board: list[list[str | None]], current_player: str, player_we_want_to_win: str, branch: int = 0) -> float:
     # If board is a terminal state, immediately
     # Return the appropriate score
 
@@ -108,14 +52,16 @@ def _minimax_score(board: list[list[str | None]], current_player: str, player_we
         _board: list[list[str | None]] = deepcopy(board)
 
         # First make the move
-        _board = make_move(_board, move, current_player)
+        _board = _make_move(_board, move, current_player)
 
         # Then get minimax score for the resulting
         # board state, passing in 'current_player''s
         # opponents because it would be their turn
 
         opponent: str = get_opponent(current_player)
-        score: float = _minimax_score(_board, opponent, player_we_want_to_win, branch + 1)
+        score: float = _minimax_score(_board, opponent,
+                                      player_we_want_to_win,
+                                      branch + 1)
         scores.append(score - (branch * 0.1))
 
     # If current_player is our AI,
@@ -128,7 +74,9 @@ def _minimax_score(board: list[list[str | None]], current_player: str, player_we
     else:
         return min(scores)
 
-def minimax_ai(board: list[list[str | None]], current_player: str) -> tuple[int, int]:
+
+def minimax_ai(board: list[list[str | None]],
+               current_player: str) -> tuple[int, int]:
     best_score: float = -1000.0
     best_move: tuple[int, int] = (-1, -1)
 
@@ -136,9 +84,11 @@ def minimax_ai(board: list[list[str | None]], current_player: str) -> tuple[int,
 
     for move in legal_moves:
         _board: list[list[str | None]] = deepcopy(board)
-        _board = make_move(_board, move, current_player)
+        _board = _make_move(_board, move, current_player)
 
-        move_score: float = _minimax_score(_board, get_opponent(current_player), current_player)
+        move_score: float = _minimax_score(_board,
+                                           get_opponent(current_player),
+                                           current_player)
 
         if move_score >= best_score:
             best_score = move_score
@@ -147,6 +97,7 @@ def minimax_ai(board: list[list[str | None]], current_player: str) -> tuple[int,
     return best_move
 
 
+# Unit testing
 if __name__ == '__main__':
     # X should win with (0, 1), (1, 2), or (2, 1)
     # O should block one of those
@@ -175,6 +126,6 @@ if __name__ == '__main__':
 
     print(minimax_ai(board, "X"))
     print(minimax_ai(board, "O"))
-    print(minimax_ai(board_2, 'X'))
+    print(minimax_ai(board_2, 'X'))  # type: ignore
     print(minimax_ai(board_3, 'X'))
     print(minimax_ai(board_3, 'O'))
