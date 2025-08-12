@@ -1,7 +1,7 @@
 """
 A minimax algorith that uses
 a more heuristic approach with
-a tiebreakers and trying to
+tiebreakers and trying to
 catch the opponent making a mistake
 """
 
