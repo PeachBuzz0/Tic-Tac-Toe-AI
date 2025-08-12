@@ -125,9 +125,7 @@ def get_winner(board: list[list[str | None]]) -> str | None:
             elif isinstance(board[coord[0]][coord[1]], str):
                 chars.append(board[coord[0]][coord[1]])
 
-        if (((chars[0] == chars[1]) == (chars[0] == chars[2]) is True)
-                and (chars[0] != '')):
-
+        if (chars.count(chars[0]) == len(chars)) and (chars[0] != ''):
             winner = chars[0]
             return winner
 
