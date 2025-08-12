@@ -148,22 +148,29 @@ def minimax_ai(board: list[list[str | None]], current_player: str) -> tuple[int,
 
 
 if __name__ == '__main__':
+    # X should win with (0, 1), (1, 2), or (2, 1)
+    # O should block one of those
     board = [
         ["X", None, "X"],
         ["O", None, None],
         ["X", None, "X"],
     ]
 
+    # X should move to either
+    # (0, 1), (0, 2), or (1, 1)
     board_2 = [
         ['X', None, None],
         ['O', None, None],
         [None, None, None],
     ]
 
+    # X should win
+    # O should block
+    # should always return (1, 1)
     board_3 = [
         ['X', None, None],
         ['O', None, None],
-        ['X', None, 'X']
+        [None, None, 'X']
     ]
 
     print(minimax_ai(board, "X"))
