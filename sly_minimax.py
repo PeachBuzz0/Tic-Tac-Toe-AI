@@ -7,8 +7,7 @@ catch the opponent making a mistake
 
 from enum import Enum
 from copy import deepcopy
-from engine import determine_winner, get_opponent, get_legal_moves
-
+from engine import determine_winner, get_opponent, get_legal_moves, new_board
 
 _lines: list[list[tuple[int, int]]] = [
         # Rows
@@ -155,41 +154,51 @@ def _in_center(move: tuple[int, int]) -> bool:
         return False
 
 
+class Points(Enum):
+    BLOCKS = 3
+    TRAP_LINES = 2
+    IN_CORNER = 1
+    IN_CENTER = 0
+
+
 def _get_tiebreaker_score(board: list[list[str | None]],
                           move: tuple[int, int],
                           current_player: str) -> int:
     # TODO decide rules for tie breaking
-    class KeyIndex(Enum):
-        BLOCKS = 0
-        TRAP_LINES = 1
-        IN_CORNER = 2
-        IN_CENTER = 3
 
-    score_dict: dict[KeyIndex, int] = {
-        KeyIndex.BLOCKS: 0,
-        KeyIndex.TRAP_LINES: 0,
-        KeyIndex.IN_CORNER: 0,
-        KeyIndex.IN_CENTER: 0
+    score_dict: dict[Points, int] = {
+        Points.BLOCKS: 0,
+        Points.TRAP_LINES: 0,
+        Points.IN_CORNER: 0,
+        Points.IN_CENTER: 0
     }
 
     _board: list[list[str | None]] = deepcopy(board)
 
     if _blocks(_board, move, current_player):
-        score_dict[KeyIndex.BLOCKS] = 1
+        score_dict[Points.BLOCKS] = 1
 
     for i in range(_count_trap_lines(_board, move, current_player)):
-        score_dict[KeyIndex.TRAP_LINES] += 1
+        score_dict[Points.TRAP_LINES] += 1
 
     if _in_corner(move):
-        score_dict[KeyIndex.IN_CORNER] = 1
+        score_dict[Points.IN_CORNER] = 1
 
     if _in_center(move):
-        score_dict[KeyIndex.IN_CENTER] = 1
+        score_dict[Points.IN_CENTER] = 1
 
-    raise NotImplementedError
+    # Turn scores into a usable value
+
+    score_key:int = 0
+
+    for key, points in score_dict.items():
+        points_gained: int = points * (10 ** key.value)
+        score_key += points_gained
+
+    return score_key
 
 
-def minimax_ai(board: list[list[str | None]],
+def sly_minimax_ai(board: list[list[str | None]],
                current_player: str) -> tuple[int, int]:
     best_score: float = -1000
     best_move: tuple[int, int] = (-1, -1)
@@ -204,7 +213,7 @@ def minimax_ai(board: list[list[str | None]],
         _board: list[list[str | None]] = deepcopy(board)
         _board = _test_move(_board, move, current_player)
 
-        move_score: float = _minimax_score(_board,
+        move_score: int = _minimax_score(_board,
                                            get_opponent(current_player),
                                            current_player)
 
@@ -212,8 +221,7 @@ def minimax_ai(board: list[list[str | None]],
             best_score = move_score
             best_move = move
             best_moves = [move]
-
-        if move_score == best_score:
+        elif move_score == best_score:
             best_moves.append(move)
 
     if len(best_moves) == 1:
@@ -231,8 +239,7 @@ def minimax_ai(board: list[list[str | None]],
                 best_score = tb_score
                 best_move = move
                 best_moves = [move]
-
-            if tb_score == best_score:
+            elif tb_score == best_score:
                 best_moves.append(move)
 
         if len(best_moves) == 1:
@@ -243,4 +250,78 @@ def minimax_ai(board: list[list[str | None]],
 
 # Unit testing
 if __name__ == '__main__':
-    ...
+    # Test _in_corner()
+    board_ic = new_board()
+    moves_corner = [(0, 0), (0, 2), (2, 0), (2, 2)]
+    for move in moves_corner:
+        assert _in_corner(move) == True
+        assert _get_tiebreaker_score(board_ic, move, 'X') == 10 ** Points.IN_CORNER.value
+        assert _get_tiebreaker_score(board_ic, move, 'O') == 10 ** Points.IN_CORNER.value
+
+    # Test _count_trap_lines()
+    board_trap_x = [
+        [None, 'X', None],
+        [None, None, 'X'],
+        [None, None, None]
+    ]
+
+    board_trap_o = [
+        [None, 'O', None],
+        [None, None, 'O'],
+        [None, None, None]
+    ]
+
+    moves_trap = [
+        (0, 0),
+        (1, 0),
+        (2, 1), (2, 2)
+    ]
+
+    for move in moves_trap:
+        assert _count_trap_lines(board_trap_x, move, 'X') == 1
+        assert _count_trap_lines(board_trap_x, move, 'O') == 0
+
+        assert _count_trap_lines(board_trap_o, move, 'X') == 0
+        assert _count_trap_lines(board_trap_o, move, 'O') == 1
+
+    assert _count_trap_lines(board_trap_x, (2, 0), 'X') == 0
+    assert _count_trap_lines(board_trap_o, (2,0), 'O') == 0
+
+    board_block = [
+        [None, 'X', None],
+        [None, None, 'X'],
+        [None, 'X', None]
+    ]
+
+    block_move = (1, 1)
+    non_blocking_moves = [
+        (0, 0), (0, 2),
+        (1, 0),
+        (2, 0), (2, 2)
+    ]
+
+    assert _blocks(board_block, block_move, 'O') == True
+
+    for move in non_blocking_moves:
+        assert _blocks(board_block, move, 'O') == False
+
+    block_trap_board = [
+        [None, 'X', None],
+        [None, 'X', None],
+        ['O', None, None]
+    ]
+
+    block_trap_move = (2, 1)
+
+    assert _get_tiebreaker_score(block_trap_board, block_trap_move, 'O') == 1100
+    assert _get_tiebreaker_score(block_trap_board, block_trap_move, 'X') == 0
+
+    board_1 = [
+        ['X', None, None],
+        ['O', None, None],
+        [None, None, None]
+    ]
+
+    print(sly_minimax_ai(board_1, 'X'))
+
+    print(sly_minimax_ai(new_board(), 'X'))
