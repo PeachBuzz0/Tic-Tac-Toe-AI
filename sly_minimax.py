@@ -165,7 +165,6 @@ class Points(Enum):
 def _get_tiebreaker_score(board: list[list[str | None]],
                           move: tuple[int, int],
                           current_player: str) -> int:
-    # TODO decide rules for tie breaking
 
     score_dict: dict[Points, int] = {
         Points.WINS: 0,
@@ -214,8 +213,6 @@ def sly_minimax_ai(board: list[list[str | None]],
 
     legal_moves: list[tuple[int, int]] = get_legal_moves(board)
 
-    # TODO store moves that result in best score in a list
-    #  and have some function to determin best one from there
     for move in legal_moves:
         _board: list[list[str | None]] = deepcopy(board)
         _board = _test_move(_board, move, current_player)
