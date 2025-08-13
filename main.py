@@ -12,6 +12,7 @@ from engine import *
 from simple_algorithms import *
 from minimax import minimax_ai
 from sly_minimax import sly_minimax_ai
+from cache import caching_minimax_ai
 
 if __name__ == "__main__":
     # Dictionary to store player info

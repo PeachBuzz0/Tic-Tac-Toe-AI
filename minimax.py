@@ -4,7 +4,7 @@ for minimax algorithm
 """
 
 from copy import deepcopy
-from engine import determine_winner, get_opponent, get_legal_moves
+from engine import determine_winner, get_opponent, get_legal_moves, new_board
 
 
 def _test_move(board: list[list[str | None]],
@@ -124,8 +124,9 @@ if __name__ == '__main__':
         [None, None, 'X']
     ]
 
-    print(minimax_ai(board, "X"))
-    print(minimax_ai(board, "O"))
-    print(minimax_ai(board_2, 'X'))  # type: ignore
-    print(minimax_ai(board_3, 'X'))
-    print(minimax_ai(board_3, 'O'))
+    print(minimax_ai(new_board(), 'X'))
+    # print(minimax_ai(board, "X"))
+    # print(minimax_ai(board, "O"))
+    # print(minimax_ai(board_2, 'X'))  # type: ignore
+    # print(minimax_ai(board_3, 'X'))
+    # print(minimax_ai(board_3, 'O'))
