@@ -155,6 +155,7 @@ def _in_center(move: tuple[int, int]) -> bool:
 
 
 class Points(Enum):
+    WINS = 4
     BLOCKS = 3
     TRAP_LINES = 2
     IN_CORNER = 1
@@ -167,6 +168,7 @@ def _get_tiebreaker_score(board: list[list[str | None]],
     # TODO decide rules for tie breaking
 
     score_dict: dict[Points, int] = {
+        Points.WINS: 0,
         Points.BLOCKS: 0,
         Points.TRAP_LINES: 0,
         Points.IN_CORNER: 0,
@@ -174,6 +176,11 @@ def _get_tiebreaker_score(board: list[list[str | None]],
     }
 
     _board: list[list[str | None]] = deepcopy(board)
+
+    _next_board = _test_move(_board, move, current_player)
+
+    if determine_winner(_next_board) == current_player:
+        score_dict[Points.WINS] += 1
 
     if _blocks(_board, move, current_player):
         score_dict[Points.BLOCKS] = 1
@@ -189,7 +196,7 @@ def _get_tiebreaker_score(board: list[list[str | None]],
 
     # Turn scores into a usable value
 
-    score_key:int = 0
+    score_key: int = 0
 
     for key, points in score_dict.items():
         points_gained: int = points * (10 ** key.value)
@@ -199,7 +206,7 @@ def _get_tiebreaker_score(board: list[list[str | None]],
 
 
 def sly_minimax_ai(board: list[list[str | None]],
-               current_player: str) -> tuple[int, int]:
+                   current_player: str) -> tuple[int, int]:
     best_score: float = -1000
     best_move: tuple[int, int] = (-1, -1)
 
@@ -213,9 +220,9 @@ def sly_minimax_ai(board: list[list[str | None]],
         _board: list[list[str | None]] = deepcopy(board)
         _board = _test_move(_board, move, current_player)
 
-        move_score: int = _minimax_score(_board,
-                                           get_opponent(current_player),
-                                           current_player)
+        move_score: int = _minimax_score(
+            _board, get_opponent(current_player), current_player
+        )
 
         if move_score > best_score:
             best_score = move_score
@@ -232,7 +239,12 @@ def sly_minimax_ai(board: list[list[str | None]],
     while not have_best_move:
 
         for move in best_moves:
+
+            if len(best_moves) == 1:
+                have_best_move = True
+
             _tie_board: list[list[str | None]] = deepcopy(board)
+
             tb_score = _get_tiebreaker_score(_tie_board, move, current_player)
 
             if tb_score > best_score:
@@ -241,9 +253,6 @@ def sly_minimax_ai(board: list[list[str | None]],
                 best_moves = [move]
             elif tb_score == best_score:
                 best_moves.append(move)
-
-        if len(best_moves) == 1:
-            have_best_move = True
 
     return best_move
 
@@ -254,7 +263,7 @@ if __name__ == '__main__':
     board_ic = new_board()
     moves_corner = [(0, 0), (0, 2), (2, 0), (2, 2)]
     for move in moves_corner:
-        assert _in_corner(move) == True
+        assert _in_corner(move) is True
         assert _get_tiebreaker_score(board_ic, move, 'X') == 10 ** Points.IN_CORNER.value
         assert _get_tiebreaker_score(board_ic, move, 'O') == 10 ** Points.IN_CORNER.value
 
@@ -285,7 +294,7 @@ if __name__ == '__main__':
         assert _count_trap_lines(board_trap_o, move, 'O') == 1
 
     assert _count_trap_lines(board_trap_x, (2, 0), 'X') == 0
-    assert _count_trap_lines(board_trap_o, (2,0), 'O') == 0
+    assert _count_trap_lines(board_trap_o, (2, 0), 'O') == 0
 
     board_block = [
         [None, 'X', None],
@@ -300,10 +309,10 @@ if __name__ == '__main__':
         (2, 0), (2, 2)
     ]
 
-    assert _blocks(board_block, block_move, 'O') == True
+    assert _blocks(board_block, block_move, 'O') is True
 
     for move in non_blocking_moves:
-        assert _blocks(board_block, move, 'O') == False
+        assert _blocks(board_block, move, 'O') is False
 
     block_trap_board = [
         [None, 'X', None],
@@ -314,7 +323,7 @@ if __name__ == '__main__':
     block_trap_move = (2, 1)
 
     assert _get_tiebreaker_score(block_trap_board, block_trap_move, 'O') == 1100
-    assert _get_tiebreaker_score(block_trap_board, block_trap_move, 'X') == 0
+    assert _get_tiebreaker_score(block_trap_board, block_trap_move, 'X') == 10000
 
     board_1 = [
         ['X', None, None],
@@ -322,6 +331,18 @@ if __name__ == '__main__':
         [None, None, None]
     ]
 
+    board_2 = [
+        ['X', None, None],
+        [None, None, None],
+        [None, None, None]
+    ]
+
     print(sly_minimax_ai(board_1, 'X'))
 
+    print()
+
     print(sly_minimax_ai(new_board(), 'X'))
+
+    print()
+
+    print(sly_minimax_ai(board_2, 'X'))
